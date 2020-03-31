@@ -1,65 +1,67 @@
-import React, { Component } from 'react';
-import axios from 'axios';
-import './App.css';
+import React, { Component } from "react";
+import axios from "axios";
+import "./App.css";
 
 class App extends Component {
-
-  constructor(props) {
-    super(props);
-
-    this.getCountryData = this.getCountryData.bind(this);
-  }
   state = {
-    confirmed: 0,
-    recovered: 0,
-    deaths: 0,
+    gloabl: {
+      confirmed: 0,
+      recovered: 0,
+      deaths: 0
+    },
     countries: [],
-    selectCountryData : null
-  }
+    selectedCountry: null
+  };
 
-  componentDidMount() {
-    this.getData();
-  }
+  getGlobalData = async () => {
+    const res = await axios.get("https://covid19.mathdro.id/api");
+    this.setState({
+      ...this.state,
+      gloabl: {
+        confirmed: res.data.confirmed.value,
+        recovered: res.data.recovered.value,
+        deaths: res.data.deaths.value
+      }
+    });
+  };
 
-  async getData() {
-    const resApi = await axios.get("https://covid19.mathdro.id/api");
-    const resCountries = await axios.get("https://covid19.mathdro.id/api/countries")
-    // countries 대신 index만 보여서 배열에 넣어서 처리
+  getCountries = async () => {
+    const resCountries = await axios.get(
+      "https://covid19.mathdro.id/api/countries"
+    );
     const countries = [];
-    for(let i=0; i<resCountries.data.countries.length; i++)
+    for (let i = 0; i < resCountries.data.countries.length; i++)
       countries.push(resCountries.data.countries[i].name);
 
     this.setState({
-      confirmed: resApi.data.confirmed.value,
-      recovered: resApi.data.recovered.value,
-      deaths: resApi.data.deaths.value,
+      ...this.state,
       countries
     });
   };
 
-  renderCountryOptions() {
-    return this.state.countries.map((country,idx) => {
-      return <option key={idx}>
-        {country}
-      </option>
-    });
+  componentDidMount() {
+    this.getGlobalData();
+    this.getCountries();
   }
 
-  async getCountryData(e) {
+  handleCountryData = async e => {
     const country = e.target.value;
-    const countryApi = await axios.get("https://covid19.mathdro.id/api/countries" + "/" + country)
-
+    const countryData = await axios.get(
+      "https://covid19.mathdro.id/api/countries" + "/" + country
+    );
+    console.log("countryData: " + JSON.stringify(countryData));
     this.setState({
-      selectCountryData : {
-        confirmed: countryApi.data.confirmed.value,
-        recovered: countryApi.data.recovered.value,
-        deaths: countryApi.data.deaths.value
+      ...this.state,
+      selectedCountry: {
+        confirmed: countryData.data.confirmed.value,
+        recovered: countryData.data.recovered.value,
+        deaths: countryData.data.deaths.value
       }
-    })
+    });
   };
+
   render() {
-    const { confirmed, recovered, deaths, selectCountryData  } = this.state;
-    const { getCountryData } = this;
+    const { gloabl, countries, selectedCountry } = this.state;
 
     return (
       <div className="container">
@@ -69,47 +71,48 @@ class App extends Component {
         <div className="flex">
           <div className="box confirmed">
             <h3>Confirmed case</h3>
-            <h4>{confirmed}</h4>
+            <h4>{gloabl.confirmed}</h4>
           </div>
 
           <div className="box recovered">
             <h3>Recovered case</h3>
-            <h4>{recovered}</h4>
+            <h4>{gloabl.recovered}</h4>
           </div>
 
           <div className="box deaths">
             <h3>Deaths case</h3>
-            <h4>{deaths}</h4>
+            <h4>{gloabl.deaths}</h4>
           </div>
         </div>
 
-      {/*
-        <h2> Select Country </h2>
-        <select onChange={getCountryData}>
-          {this.renderCountryOptions()}
+        <h2>Select Country</h2>
+        <select onChange={this.handleCountryData}>
+          {countries &&
+            countries.map((country, idx) => {
+              return <option key={idx}>{country}</option>;
+            })}
         </select>
-      
-         {selectCountryData &&
-        (
+
+        {selectedCountry && (
           <div className="flex">
-          <div className="box confirmed">
-            <h3>Confirmed case</h3>
-            <h4>{confirmed}</h4>
-          </div>
+            <div className="box confirmed">
+              <h3>Confirmed case</h3>
+              <h4>{selectedCountry.confirmed}</h4>
+            </div>
 
-          <div className="box recovered">
-            <h3>Recovered case</h3>
-            <h4>{recovered}</h4>
-          </div>
+            <div className="box recovered">
+              <h3>Recovered case</h3>
+              <h4>{selectedCountry.recovered}</h4>
+            </div>
 
-          <div className="box deaths">
-            <h3>Deaths case</h3>
-            <h4>{deaths}</h4>
+            <div className="box deaths">
+              <h3>Deaths case</h3>
+              <h4>{selectedCountry.deaths}</h4>
+            </div>
           </div>
-        </div>
-        )} */}
+        )}
       </div>
-    )
+    );
   }
 }
 
