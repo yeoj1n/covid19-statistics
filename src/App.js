@@ -45,11 +45,18 @@ class App extends Component {
   }
 
   handleCountryData = async e => {
+    if (e.target.value === "default") {
+      this.setState({
+        ...this.state,
+        selectedCountry: null
+      });
+      return;
+    }
     const country = e.target.value;
     const countryData = await axios.get(
       "https://covid19.mathdro.id/api/countries" + "/" + country
     );
-    console.log("countryData: " + JSON.stringify(countryData));
+
     this.setState({
       ...this.state,
       selectedCountry: {
@@ -70,23 +77,26 @@ class App extends Component {
         <h2> All Countries </h2>
         <div className="flex">
           <div className="box confirmed">
-            <h3>Confirmed case</h3>
+            <h3>Confirmed</h3>
             <h4>{gloabl.confirmed}</h4>
           </div>
 
           <div className="box recovered">
-            <h3>Recovered case</h3>
+            <h3>Recovered</h3>
             <h4>{gloabl.recovered}</h4>
           </div>
 
           <div className="box deaths">
-            <h3>Deaths case</h3>
+            <h3>Deaths</h3>
             <h4>{gloabl.deaths}</h4>
           </div>
         </div>
 
         <h2>Select Country</h2>
         <select onChange={this.handleCountryData}>
+          <option defaultValue value="default">
+            Select Country Name
+          </option>
           {countries &&
             countries.map((country, idx) => {
               return <option key={idx}>{country}</option>;
@@ -96,17 +106,17 @@ class App extends Component {
         {selectedCountry && (
           <div className="flex">
             <div className="box confirmed">
-              <h3>Confirmed case</h3>
+              <h3>Confirmed</h3>
               <h4>{selectedCountry.confirmed}</h4>
             </div>
 
             <div className="box recovered">
-              <h3>Recovered case</h3>
+              <h3>Recovered</h3>
               <h4>{selectedCountry.recovered}</h4>
             </div>
 
             <div className="box deaths">
-              <h3>Deaths case</h3>
+              <h3>Deaths</h3>
               <h4>{selectedCountry.deaths}</h4>
             </div>
           </div>
