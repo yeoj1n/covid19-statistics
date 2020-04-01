@@ -75,3 +75,8 @@ select {
   height: 3vh;
   font-size: 1em;
 }
+
+.warningMsg {
+  text-align: center;
+  height: 100%;
+}
